@@ -1,6 +1,6 @@
 import './App.css';
 
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { adminRoutes } from './router/index'
 import Frame from './compontents/Frame/index'
 function App() {
