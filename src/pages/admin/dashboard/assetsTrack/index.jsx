@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
-import { Card, Button, Table } from 'antd'
+import { Card, Button, Table, Divider, Modal } from 'antd'
+import UserModal from '../../../../compontents/Modal/userModal'
 export default class index extends Component {
+ 	formRef = React.createRef(); // ref 标识
+
 	state = {
 		dataSource: [
 			{
@@ -48,16 +51,29 @@ export default class index extends Component {
 					</div>
 				)
 			},
-		]
+		],
+	 	rowSelection: { // 表单选择框携带的方法
+			onChange: (selectedRowKeys, selectedRows) => {
+				console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+			},
+			getCheckboxProps: (record) => ({
+				disabled: record.key === "1", // 禁用
+				// Column configuration not to be checked
+				key: record.key,
+			}),
+		},
+		isModalVisible: false,
 	}
 	constructor(props) {
 		super(props)
 	}
 	handleAdd = () => {
 		console.log('add');
+		this.rowSelection.getCheckboxProps()
 	}
 	handleEdit = (id) => {
 		return (e) => { //	$event 默认作为最后一个参数
+			this.setState({isModalVisible: true})
 			console.log('handleEdit', id);
 		}
 	}
@@ -66,14 +82,32 @@ export default class index extends Component {
 			console.log('handleDel', id);
 		}
 	}
+	handleOk = async () => {
+		// this.setState({isModalVisible: false})
+		console.log('OK');
+		try {
+			const res = await this.formRef.current.validateFields()
+			console.log('下一步',res);
+		} catch (error) {
+			console.log('验证失败！',error);
+		}
+	}
+	handleCancel = () => {
+		this.setState({isModalVisible: false})
+		console.log('CANCEL');
+	}
 	render() {
-		const { dataSource, columns } = this.state
+		const { dataSource, columns, rowSelection, isModalVisible } = this.state
 		return (
 			<div>
 				<Card title='assetsTrak' extra={<Button type="primary" onClick={this.handleAdd}>新 增</Button>}>
 					<p>资产追踪列表</p>
-					<Table dataSource={dataSource} columns={columns}></Table>
+					<Divider></Divider>
+					<Table rowSelection={{ type: "checkbox", ...rowSelection }} dataSource={dataSource} columns={columns}></Table>
 				</Card>
+				<Modal title="修改用户信息" visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
+					<UserModal ref={this.formRef} ></UserModal>
+				</Modal>
 			</div>
 		)
 	}
